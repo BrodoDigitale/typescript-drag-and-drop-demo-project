@@ -5,7 +5,19 @@ class ProjectInput {
         this.hostElement = document.getElementById('app');
         const importedNode = document.importNode(this.templateElement.content, true);
         this.element = importedNode.firstElementChild;
+        this.element.id = "user-input";
+        this.titleInputElement = this.element.querySelector('#title');
+        this.descriptionInputElement = this.element.querySelector('#people');
+        this.peopleInputElement = this.element.querySelector('#description');
+        this.configure();
         this.renderForm();
+    }
+    submitHandler(event) {
+        event.preventDefault();
+        console.log(this.titleInputElement.value);
+    }
+    configure() {
+        this.element.addEventListener('submit', this.submitHandler.bind(this));
     }
     renderForm() {
         this.hostElement.insertAdjacentElement('afterbegin', this.element);
