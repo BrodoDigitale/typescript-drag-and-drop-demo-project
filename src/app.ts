@@ -32,11 +32,31 @@ class ProjectInput {
         this.element.id = "user-input";
 
         this.titleInputElement = this.element.querySelector('#title') as HTMLInputElement;
-        this.descriptionInputElement = this.element.querySelector('#people') as HTMLInputElement;
-        this.peopleInputElement = this.element.querySelector('#description') as HTMLInputElement;
+        this.descriptionInputElement = this.element.querySelector('#description') as HTMLInputElement;
+        this.peopleInputElement = this.element.querySelector('#people') as HTMLInputElement;
         this.configure();
         this.renderForm();
 
+    }
+    
+    //if input is invalid --> void return else a tuple
+    private inputValuesCollector(): [string, string, number] | void {
+      const titleInput = this.titleInputElement.value;
+      const descriptionInput = this.descriptionInputElement.value;
+      const peopleInput = this.peopleInputElement.value;
+      if (
+        titleInput.trim().length === 0 || descriptionInput.trim().length === 0 || peopleInput.trim().length === 0
+      ) {
+        alert('invalid input!')
+      } else {
+        return [titleInput, descriptionInput, +peopleInput]
+      }
+    }
+
+    private clearInputs() {
+      this.titleInputElement.value = "";
+      this.descriptionInputElement.value = "";
+      this.peopleInputElement.value = "";
     }
 
     @autobind
@@ -44,7 +64,13 @@ class ProjectInput {
         event.preventDefault();
         //validate inputs
         //do something with data
-        console.log(this.titleInputElement.value)
+        const inputValues = this.inputValuesCollector();
+        if (inputValues) {
+          const [title, description, people] = inputValues;
+          console.log(title, description, people);
+          this.clearInputs();
+        }
+
     }
     private configure() {
         this.element.addEventListener('submit', this.submitHandler);
