@@ -1,3 +1,35 @@
+//validation
+
+interface validationObject {
+  property: string | number;
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+}
+
+function validate(validatableInput: validationObject) {
+  let isValid = true;
+  if(validatableInput.required) {
+    isValid = isValid && validatableInput.property.toString().trim().length > 0;
+  }
+  if(validatableInput.minLength && typeof validatableInput.property === "string") {
+    isValid = isValid && validatableInput.property.trim().length >= validatableInput.minLength;
+  }
+  if(validatableInput.maxLength && typeof validatableInput.property === "string") {
+    isValid = isValid && validatableInput.property.trim().length <= validatableInput.maxLength;
+  }
+  if(validatableInput.min && typeof validatableInput.property === "number") {
+    isValid = isValid && validatableInput.property >= validatableInput.min;
+  }
+  if(validatableInput.max && typeof validatableInput.property === "number") {
+    isValid = isValid && validatableInput.property <= validatableInput.max;
+  }
+  return isValid;
+}
+
+
 //autobind decorator
 function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
@@ -44,9 +76,15 @@ class ProjectInput {
       const titleInput = this.titleInputElement.value;
       const descriptionInput = this.descriptionInputElement.value;
       const peopleInput = this.peopleInputElement.value;
+
+      const titleInputValidation: validationObject = { property: titleInput, required: true};
+      const descriptionInputValidation: validationObject = { property: descriptionInput, required: true, minLength: 5};
+      const peopleInputValidation: validationObject = { property: +peopleInput, required: true, min: 1, max: 9};
+
       if (
-        titleInput.trim().length === 0 || descriptionInput.trim().length === 0 || peopleInput.trim().length === 0
-      ) {
+        !validate(titleInputValidation) || 
+        !validate(descriptionInputValidation) || 
+        !validate(peopleInputValidation)) {
         alert('invalid input!')
       } else {
         return [titleInput, descriptionInput, +peopleInput]
