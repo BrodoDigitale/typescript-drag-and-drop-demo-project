@@ -129,7 +129,12 @@ class ProjectList {
 
     //projects will be taken from inside of the class
     projectState.addListener((projects: Project[]) => {
-      this.assignedProjects = projects;
+      this.assignedProjects = projects.filter((prj) => {
+        if(this.type === "active") {
+          return prj.projectStatus === ProjectStatus.Active
+        }
+        return prj.projectStatus === ProjectStatus.Finished;
+       });
       this.renderProjects()
     });
     this.renderList();
@@ -138,6 +143,8 @@ class ProjectList {
 }
 private renderProjects() {
   const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
+  //to clear out all the list and avoid double render of tasks
+  listEl.innerHTML = ""
   for (const prjItem of this.assignedProjects) {
     const listItem = document.createElement('li');
     listItem.textContent = prjItem.title;
