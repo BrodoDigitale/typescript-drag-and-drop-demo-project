@@ -8,6 +8,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 class ProjectState {
     constructor() {
         this.projects = [];
+        this.listeners = [];
+    }
+    addListener(listenerFn) {
+        this.listeners.push(listenerFn);
     }
     static getInstance() {
         if (this.instance) {
@@ -24,6 +28,9 @@ class ProjectState {
             people: numOfPeople,
         };
         this.projects.push(newProject);
+        for (const listener of this.listeners) {
+            listener(this.projects.slice());
+        }
     }
 }
 const projectState = ProjectState.getInstance();
@@ -65,8 +72,21 @@ class ProjectList {
         const importedNode = document.importNode(this.templateElement.content, true);
         this.element = importedNode.firstElementChild;
         this.element.id = `${this.type}-projects`;
+        this.assignedProjects = [];
+        projectState.addListener((projects) => {
+            this.assignedProjects = projects;
+            this.renderProjects();
+        });
         this.renderList();
         this.renderContent();
+    }
+    renderProjects() {
+        const listEl = document.getElementById(`${this.type}-projects-list`);
+        for (const prjItem of this.assignedProjects) {
+            const listItem = document.createElement('li');
+            listItem.textContent = prjItem.title;
+            listEl.appendChild(listItem);
+        }
     }
     renderContent() {
         const listId = `${this.type}-projects-list`;

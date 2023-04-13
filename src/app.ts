@@ -3,12 +3,16 @@
 class ProjectState {
   //list of all projects
   private projects: any[] = [];
-
+  private listeners: any[] = [];
   //together with getInstance guarantees that we are always working with the same instance of state
   private static instance: ProjectState;
 
   private constructor() {
 
+  }
+
+  addListener(listenerFn: Function) {
+    this.listeners.push(listenerFn);
   }
 
 static getInstance() {
@@ -28,6 +32,12 @@ static getInstance() {
     people: numOfPeople,
   }
   this.projects.push(newProject)
+  //after project is added loop through all listeners and call them
+  for (const listener of this.listeners) {
+    //slice is used just to pass a copy of projects, not the original array
+    //can be substituted with [...this.projects]
+    listener(this.projects.slice());
+  }
  }
 }
 
@@ -86,6 +96,7 @@ class ProjectList {
   templateElement: HTMLTemplateElement;
   hostElement: HTMLDivElement;
   element: HTMLElement;
+  assignedProjects: any[];
   constructor(private type: "active" | "finished") {
     this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
     this.hostElement = document.getElementById('app')! as HTMLDivElement;
@@ -93,9 +104,24 @@ class ProjectList {
     const importedNode = document.importNode(this.templateElement.content, true);
     this.element = importedNode.firstElementChild as HTMLElement;
     this.element.id = `${this.type}-projects`;
+    this.assignedProjects = [];
+
+    //projects will be taken from inside of the class
+    projectState.addListener((projects:any) => {
+      this.assignedProjects = projects;
+      this.renderProjects()
+    });
     this.renderList();
     this.renderContent();
 
+}
+private renderProjects() {
+  const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
+  for (const prjItem of this.assignedProjects) {
+    const listItem = document.createElement('li');
+    listItem.textContent = prjItem.title;
+    listEl.appendChild(listItem)
+  }
 }
 private renderContent() {
   const listId = `${this.type}-projects-list`
