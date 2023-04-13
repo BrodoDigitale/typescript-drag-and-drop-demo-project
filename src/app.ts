@@ -1,5 +1,41 @@
-//validation
+//PROJECT STATE MANAGEMENT
 
+class ProjectState {
+  //list of all projects
+  private projects: any[] = [];
+
+  //together with getInstance guarantees that we are always working with the same instance of state
+  private static instance: ProjectState;
+
+  private constructor() {
+
+  }
+
+static getInstance() {
+  if(this.instance) {
+      return this.instance
+  }
+  this.instance = new ProjectState();
+  return this.instance;
+}
+
+ addProject(title: string, desc: string, numOfPeople: number) {
+  const newProject = {
+    //id must be unique, so not the best way 
+    id: Math.random().toString(),
+    title: title,
+    description: desc,
+    people: numOfPeople,
+  }
+  this.projects.push(newProject)
+ }
+}
+
+//ProjectState can ONLY be instanciated via getInstance because it's constructor is private
+//so guarantees there always will be only one object of the type in app - SINGLETON
+const projectState = ProjectState.getInstance();
+
+//validation
 interface validationObject {
   property: string | number;
   required?: boolean;
@@ -134,6 +170,7 @@ class ProjectInput {
         if (inputValues) {
           const [title, description, people] = inputValues;
           console.log(title, description, people);
+          projectState.addProject(title, description, people);
           this.clearInputs();
         }
 
