@@ -136,8 +136,8 @@ function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
       this.hostElement.insertAdjacentElement(insertAtStart ? 'afterbegin' : 'beforeend', this.element)
     }
 
-    //methods are void but they force any inherited class to implement them
-    abstract configure(): void;
+    //methods are void but they force any inherited class to implement them (only those without? actually)
+    abstract configure?(): void;
     abstract renderContent(): void;
 
   }
@@ -145,20 +145,18 @@ function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
 
 //ProjectList Class
 
-class ProjectList {
-  templateElement: HTMLTemplateElement;
-  hostElement: HTMLDivElement;
-  element: HTMLElement;
+class ProjectList extends Component<HTMLDivElement, HTMLElement> {
   assignedProjects: Project[];
+  
   constructor(private type: "active" | "finished") {
-    this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
-    this.hostElement = document.getElementById('app')! as HTMLDivElement;
-
-    const importedNode = document.importNode(this.templateElement.content, true);
-    this.element = importedNode.firstElementChild as HTMLElement;
-    this.element.id = `${this.type}-projects`;
+    super('project-list', 'app', false, `${type}-projects-list`);
     this.assignedProjects = [];
 
+    this.configure();
+    this.renderContent();
+}
+//add empry method because class requieres it
+configure() {
     //projects will be taken from inside of the class
     projectState.addListener((projects: Project[]) => {
       this.assignedProjects = projects.filter((prj) => {
@@ -169,9 +167,11 @@ class ProjectList {
        });
       this.renderProjects()
     });
-    this.renderList();
-    this.renderContent();
-
+}
+renderContent() {
+  const listId = `${this.type}-projects-list`
+  this.element.querySelector('ul')!.id = listId;
+  this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + " PROJECTS";
 }
 private renderProjects() {
   const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
@@ -183,44 +183,32 @@ private renderProjects() {
     listEl.appendChild(listItem)
   }
 }
-private renderContent() {
-  const listId = `${this.type}-projects-list`
-  this.element.querySelector('ul')!.id = listId;
-  this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + " PROJECTS";
-}
-private renderList() {
-  this.hostElement.insertAdjacentElement('beforeend', this.element)
-}
-
 }
 
 
 
   //ProjectInput Class
-class ProjectInput {
-    templateElement: HTMLTemplateElement;
-    hostElement: HTMLDivElement;
-    element: HTMLFormElement;
+class ProjectInput extends Component< HTMLDivElement, HTMLFormElement> {
     titleInputElement: HTMLInputElement;
     descriptionInputElement: HTMLInputElement;
     peopleInputElement: HTMLInputElement;
 
     constructor() {
-        this.templateElement = document.getElementById('project-input')! as HTMLTemplateElement;
-        this.hostElement = document.getElementById('app')! as HTMLDivElement;
+      super('project-input', 'app', true, "user-input");
+      this.titleInputElement = this.element.querySelector('#title') as HTMLInputElement;
+      this.descriptionInputElement = this.element.querySelector('#description') as HTMLInputElement;
+      this.peopleInputElement = this.element.querySelector('#people') as HTMLInputElement;
 
-        const importedNode = document.importNode(this.templateElement.content, true);
-        this.element = importedNode.firstElementChild as HTMLFormElement;
-        this.element.id = "user-input";
-
-        this.titleInputElement = this.element.querySelector('#title') as HTMLInputElement;
-        this.descriptionInputElement = this.element.querySelector('#description') as HTMLInputElement;
-        this.peopleInputElement = this.element.querySelector('#people') as HTMLInputElement;
-        this.configure();
-        this.renderForm();
+      this.configure();
 
     }
-    
+    //private is removed because abstarct method cannot be private
+    //public methods always declared before private
+    configure() {
+      this.element.addEventListener('submit', this.submitHandler);
+  }
+    //added just because base class requires it
+    renderContent(){}
     //if input is invalid --> void return else a tuple
     private inputValuesCollector(): [string, string, number] | void {
       const titleInput = this.titleInputElement.value;
@@ -260,13 +248,6 @@ class ProjectInput {
           this.clearInputs();
         }
 
-    }
-    private configure() {
-        this.element.addEventListener('submit', this.submitHandler);
-    }
-
-    private renderForm() {
-        this.hostElement.insertAdjacentElement('afterbegin', this.element)
     }
 }
 
