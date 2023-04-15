@@ -15,26 +15,33 @@ class Project {
   ) {}
 }
 
-//Listener type
 
-type Listener = (projects: Project[]) => void;
 
 //PROJECT STATE MANAGEMENT
+//Listener type
+type Listener<T> = (items: T[]) => void;
 
-class ProjectState {
+//base class for state
+class State<T> {
+  //cannot be accessed from outside but can be accessed by class that inherites
+  protected listeners: Listener<T>[] = [];
+
+  addListener(listenerFn: Listener<T>) {
+    this.listeners.push(listenerFn);
+  }
+}
+class ProjectState extends State<Project> {
   //list of all projects
   private projects: Project[] = [];
-  private listeners: Listener[] = [];
+  
   //together with getInstance guarantees that we are always working with the same instance of state
   private static instance: ProjectState;
 
   private constructor() {
-
+    super();
   }
 
-  addListener(listenerFn: Listener) {
-    this.listeners.push(listenerFn);
-  }
+
 
 static getInstance() {
   if(this.instance) {
@@ -126,6 +133,7 @@ function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
       const importedNode = document.importNode(this.templateElement.content, true);
       this.element = importedNode.firstElementChild as U;
       if(newElementId) {
+        console.log(newElementId);
         this.element.id = newElementId;
       }   
 
@@ -149,9 +157,8 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
   assignedProjects: Project[];
   
   constructor(private type: "active" | "finished") {
-    super('project-list', 'app', false, `${type}-projects-list`);
+    super('project-list', 'app', false, `${type}-projects`);
     this.assignedProjects = [];
-
     this.configure();
     this.renderContent();
 }
@@ -161,7 +168,7 @@ configure() {
     projectState.addListener((projects: Project[]) => {
       this.assignedProjects = projects.filter((prj) => {
         if(this.type === "active") {
-          return prj.projectStatus === ProjectStatus.Active
+          return prj.projectStatus === ProjectStatus.Active;
         }
         return prj.projectStatus === ProjectStatus.Finished;
        });

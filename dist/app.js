@@ -19,13 +19,18 @@ class Project {
         this.projectStatus = projectStatus;
     }
 }
-class ProjectState {
+class State {
     constructor() {
-        this.projects = [];
         this.listeners = [];
     }
     addListener(listenerFn) {
         this.listeners.push(listenerFn);
+    }
+}
+class ProjectState extends State {
+    constructor() {
+        super();
+        this.projects = [];
     }
     static getInstance() {
         if (this.instance) {
@@ -80,6 +85,7 @@ class Component {
         const importedNode = document.importNode(this.templateElement.content, true);
         this.element = importedNode.firstElementChild;
         if (newElementId) {
+            console.log(newElementId);
             this.element.id = newElementId;
         }
         this.render(insertAtStart);
@@ -90,7 +96,7 @@ class Component {
 }
 class ProjectList extends Component {
     constructor(type) {
-        super('project-list', 'app', false, `${type}-projects-list`);
+        super('project-list', 'app', false, `${type}-projects`);
         this.type = type;
         this.assignedProjects = [];
         this.configure();
