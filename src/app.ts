@@ -207,7 +207,7 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> implements 
   
   //ProjectList Class
 
-class ProjectList extends Component<HTMLDivElement, HTMLElement> {
+class ProjectList extends Component<HTMLDivElement, HTMLElement> implements Droppable{
   assignedProjects: Project[];
   
   constructor(private type: "active" | "finished") {
@@ -218,6 +218,10 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
 }
 //add empry method because class requieres it
 configure() {
+    this.element.addEventListener('dragover', this.dragOverHandler);
+    this.element.addEventListener('dragleave', this.dragLeaveHandler);
+    this.element.addEventListener('drop', this.dropHandler);
+
     //projects will be taken from inside of the class
     projectState.addListener((projects: Project[]) => {
       this.assignedProjects = projects.filter((prj) => {
@@ -241,6 +245,18 @@ private renderProjects() {
   for (const prjItem of this.assignedProjects) {
     new ProjectItem(this.element.querySelector('ul')!.id, prjItem);
   }
+}
+@autobind
+dragOverHandler(_: DragEvent): void {
+  this.element.querySelector('ul')!.classList.add('droppable');
+}
+@autobind
+dropHandler(_: DragEvent): void {
+  
+}
+@autobind
+dragLeaveHandler(_: DragEvent): void {
+  this.element.querySelector('ul')!.classList.remove('droppable');
 }
 }
 
