@@ -41,8 +41,6 @@ class ProjectState extends State<Project> {
     super();
   }
 
-
-
 static getInstance() {
   if(this.instance) {
       return this.instance
@@ -119,7 +117,6 @@ function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
   }
 
   //Component Base Class
-
   //abstract tells us that this class should never be instanciated and used for inheritance only
   abstract class Component<T extends HTMLElement, U extends HTMLElement> {
     templateElement: HTMLTemplateElement;
@@ -151,7 +148,31 @@ function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
   }
 
 
-//ProjectList Class
+//ProjectItem Class
+
+class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
+  private project: Project;
+  constructor(hostId: string, project: Project) {
+    super('single-project', hostId, false, project.id);
+    this.project = project;
+
+    this.configure();
+    this.renderContent();
+
+}
+  configure(): void {
+    
+  }
+  renderContent(): void {
+    this.element.querySelector('h2')!.textContent = this.project.title;
+    this.element.querySelector('h3')!.textContent = this.project.people.toString();
+    this.element.querySelector('p')!.textContent = this.project.description;
+  }
+}
+  
+  
+  
+  //ProjectList Class
 
 class ProjectList extends Component<HTMLDivElement, HTMLElement> {
   assignedProjects: Project[];
@@ -185,9 +206,7 @@ private renderProjects() {
   //to clear out all the list and avoid double render of tasks
   listEl.innerHTML = ""
   for (const prjItem of this.assignedProjects) {
-    const listItem = document.createElement('li');
-    listItem.textContent = prjItem.title;
-    listEl.appendChild(listItem)
+    new ProjectItem(this.element.querySelector('ul')!.id, prjItem);
   }
 }
 }
