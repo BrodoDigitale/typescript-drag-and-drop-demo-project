@@ -1,13 +1,13 @@
 //Drag and Drop interfaces
 interface Draggable{
-  DragStartHandler(event: DragEvent): void;
-  DragEndHandler(event: DragEvent): void;
+  dragStartHandler(event: DragEvent): void;
+  dragEndHandler(event: DragEvent): void;
 }
 
 interface Droppable{
-  dragOverHandler(): void;
-  dropHandler(): void;
-  dragLeaveHandler(): void;
+  dragOverHandler(event: DragEvent): void;
+  dropHandler(event: DragEvent): void;
+  dragLeaveHandler(event: DragEvent): void;
 }
 
 
@@ -163,7 +163,7 @@ function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
 
 //ProjectItem Class
 
-class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
+class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> implements Draggable {
   private project: Project;
 
   get persons() {
@@ -183,12 +183,23 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
 
 }
   configure(): void {
-    
+    this.element.addEventListener('dragstart', this.dragStartHandler);
+    this.element.addEventListener('dragend', this.dragEndHandler);
   }
   renderContent(): void {
     this.element.querySelector('h2')!.textContent = this.project.title;
     this.element.querySelector('h3')!.textContent = this.persons;
     this.element.querySelector('p')!.textContent = this.project.description;
+  }
+
+  //we need to bind it as it gets passed as a callback for eventListeneres
+  @autobind
+  dragStartHandler(event: DragEvent): void {
+    console.log(event);
+  }
+  @autobind
+  dragEndHandler(_: DragEvent): void {
+    console.log('drag ended');
   }
 }
   
