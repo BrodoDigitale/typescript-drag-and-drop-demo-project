@@ -1,3 +1,16 @@
+//Drag and Drop interfaces
+interface Draggable{
+  DragStartHandler(event: DragEvent): void;
+  DragEndHandler(event: DragEvent): void;
+}
+
+interface Droppable{
+  dragOverHandler(): void;
+  dropHandler(): void;
+  dragLeaveHandler(): void;
+}
+
+
 //Project type
 
 //enum type
