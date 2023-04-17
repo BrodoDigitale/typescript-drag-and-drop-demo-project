@@ -42,6 +42,16 @@ class ProjectState extends State {
     addProject(title, desc, numOfPeople) {
         const newProject = new Project(Math.random().toString(), title, desc, numOfPeople, ProjectStatus.Active);
         this.projects.push(newProject);
+        this.updateListeners();
+    }
+    moveProject(id, newStatus) {
+        const project = this.projects.find(prj => prj.id === id);
+        if (project && project.projectStatus !== newStatus) {
+            project.projectStatus = newStatus;
+            this.updateListeners();
+        }
+    }
+    updateListeners() {
         for (const listener of this.listeners) {
             listener(this.projects.slice());
         }
@@ -172,7 +182,8 @@ class ProjectList extends Component {
         }
     }
     dropHandler(event) {
-        console.log(event.dataTransfer.getData('text/plain'));
+        const prjId = event.dataTransfer.getData('text/plain');
+        projectState.moveProject(prjId, this.type === "active" ? ProjectStatus.Active : ProjectStatus.Finished);
     }
     dragLeaveHandler(_) {
         this.element.querySelector('ul').classList.remove('droppable');

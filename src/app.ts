@@ -72,6 +72,18 @@ static getInstance() {
   )
   this.projects.push(newProject)
   //after project is added loop through all listeners and call them
+  this.updateListeners();
+ }
+
+ moveProject(id: string, newStatus: ProjectStatus) {
+  const project = this.projects.find(prj => prj.id === id);
+  if(project && project.projectStatus !== newStatus) {
+    project.projectStatus = newStatus;
+    this.updateListeners();
+  }
+ }
+
+ private updateListeners() {
   for (const listener of this.listeners) {
     //slice is used just to pass a copy of projects, not the original array
     //can be substituted with [...this.projects]
@@ -259,7 +271,8 @@ dragOverHandler(event: DragEvent): void {
 }
 @autobind
 dropHandler(event: DragEvent): void {
-  console.log(event.dataTransfer!.getData('text/plain'));
+  const prjId = event.dataTransfer!.getData('text/plain');
+  projectState.moveProject(prjId, this.type === "active" ? ProjectStatus.Active : ProjectStatus.Finished);
 }
 @autobind
 dragLeaveHandler(_: DragEvent): void {
