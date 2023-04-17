@@ -85,7 +85,6 @@ class Component {
         const importedNode = document.importNode(this.templateElement.content, true);
         this.element = importedNode.firstElementChild;
         if (newElementId) {
-            console.log(newElementId);
             this.element.id = newElementId;
         }
         this.render(insertAtStart);
@@ -119,7 +118,8 @@ class ProjectItem extends Component {
         this.element.querySelector('p').textContent = this.project.description;
     }
     dragStartHandler(event) {
-        console.log(event);
+        event.dataTransfer.setData('text/plain', this.project.id);
+        event.dataTransfer.effectAllowed = 'move';
     }
     dragEndHandler(_) {
         console.log('drag ended');
@@ -165,10 +165,14 @@ class ProjectList extends Component {
             new ProjectItem(this.element.querySelector('ul').id, prjItem);
         }
     }
-    dragOverHandler(_) {
-        this.element.querySelector('ul').classList.add('droppable');
+    dragOverHandler(event) {
+        if (event.dataTransfer && event.dataTransfer.types[0] === "text/plain") {
+            event.preventDefault();
+            this.element.querySelector('ul').classList.add('droppable');
+        }
     }
-    dropHandler(_) {
+    dropHandler(event) {
+        console.log(event.dataTransfer.getData('text/plain'));
     }
     dragLeaveHandler(_) {
         this.element.querySelector('ul').classList.remove('droppable');
@@ -221,7 +225,6 @@ class ProjectInput extends Component {
         const inputValues = this.inputValuesCollector();
         if (inputValues) {
             const [title, description, people] = inputValues;
-            console.log(title, description, people);
             projectState.addProject(title, description, people);
             this.clearInputs();
         }

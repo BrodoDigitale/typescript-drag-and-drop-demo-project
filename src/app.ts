@@ -143,7 +143,6 @@ function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
       const importedNode = document.importNode(this.templateElement.content, true);
       this.element = importedNode.firstElementChild as U;
       if(newElementId) {
-        console.log(newElementId);
         this.element.id = newElementId;
       }   
 
@@ -195,7 +194,9 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> implements 
   //we need to bind it as it gets passed as a callback for eventListeneres
   @autobind
   dragStartHandler(event: DragEvent): void {
-    console.log(event);
+    //transfer just id of the project
+    event.dataTransfer!.setData('text/plain', this.project.id);
+    event.dataTransfer!.effectAllowed = 'move';
   }
   @autobind
   dragEndHandler(_: DragEvent): void {
@@ -247,12 +248,18 @@ private renderProjects() {
   }
 }
 @autobind
-dragOverHandler(_: DragEvent): void {
-  this.element.querySelector('ul')!.classList.add('droppable');
+dragOverHandler(event: DragEvent): void {
+  //check that dropping is allowed
+  if(event.dataTransfer && event.dataTransfer.types[0] === "text/plain") {
+    //because default is not allowing dropping so we should prevent it
+    event.preventDefault();
+    this.element.querySelector('ul')!.classList.add('droppable');
+  }
+  
 }
 @autobind
-dropHandler(_: DragEvent): void {
-  
+dropHandler(event: DragEvent): void {
+  console.log(event.dataTransfer!.getData('text/plain'));
 }
 @autobind
 dragLeaveHandler(_: DragEvent): void {
@@ -318,7 +325,6 @@ class ProjectInput extends Component< HTMLDivElement, HTMLFormElement> {
         const inputValues = this.inputValuesCollector();
         if (inputValues) {
           const [title, description, people] = inputValues;
-          console.log(title, description, people);
           projectState.addProject(title, description, people);
           this.clearInputs();
         }
