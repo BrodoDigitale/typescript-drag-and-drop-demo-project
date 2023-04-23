@@ -7,21 +7,67 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var App;
 (function (App) {
-    let ProjectStatus;
-    (function (ProjectStatus) {
-        ProjectStatus[ProjectStatus["Active"] = 0] = "Active";
-        ProjectStatus[ProjectStatus["Finished"] = 1] = "Finished";
-    })(ProjectStatus = App.ProjectStatus || (App.ProjectStatus = {}));
-    class Project {
-        constructor(id, title, description, people, projectStatus) {
-            this.id = id;
-            this.title = title;
-            this.description = description;
-            this.people = people;
-            this.projectStatus = projectStatus;
+    class Component {
+        constructor(templateId, hostElementId, insertAtStart, newElementId) {
+            this.templateElement = document.getElementById(templateId);
+            this.hostElement = document.getElementById(hostElementId);
+            const importedNode = document.importNode(this.templateElement.content, true);
+            this.element = importedNode.firstElementChild;
+            if (newElementId) {
+                this.element.id = newElementId;
+            }
+            this.render(insertAtStart);
+        }
+        render(insertAtStart) {
+            this.hostElement.insertAdjacentElement(insertAtStart ? "afterbegin" : "beforeend", this.element);
         }
     }
-    App.Project = Project;
+    App.Component = Component;
+})(App || (App = {}));
+var App;
+(function (App) {
+    function autobind(_, _2, descriptor) {
+        const originalMethod = descriptor.value;
+        const modifiedDescriptor = {
+            configurable: true,
+            get() {
+                const boundFn = originalMethod.bind(this);
+                return boundFn;
+            },
+        };
+        return modifiedDescriptor;
+    }
+    App.autobind = autobind;
+})(App || (App = {}));
+var App;
+(function (App) {
+    function validate(validatableInput) {
+        let isValid = true;
+        if (validatableInput.required) {
+            isValid =
+                isValid && validatableInput.property.toString().trim().length > 0;
+        }
+        if (validatableInput.minLength &&
+            typeof validatableInput.property === "string") {
+            isValid =
+                isValid &&
+                    validatableInput.property.trim().length >= validatableInput.minLength;
+        }
+        if (validatableInput.maxLength &&
+            typeof validatableInput.property === "string") {
+            isValid =
+                isValid &&
+                    validatableInput.property.trim().length <= validatableInput.maxLength;
+        }
+        if (validatableInput.min && typeof validatableInput.property === "number") {
+            isValid = isValid && validatableInput.property >= validatableInput.min;
+        }
+        if (validatableInput.max && typeof validatableInput.property === "number") {
+            isValid = isValid && validatableInput.property <= validatableInput.max;
+        }
+        return isValid;
+    }
+    App.validate = validate;
 })(App || (App = {}));
 var App;
 (function (App) {
@@ -65,70 +111,6 @@ var App;
     }
     App.ProjectState = ProjectState;
     App.projectState = ProjectState.getInstance();
-})(App || (App = {}));
-var App;
-(function (App) {
-    function validate(validatableInput) {
-        let isValid = true;
-        if (validatableInput.required) {
-            isValid =
-                isValid && validatableInput.property.toString().trim().length > 0;
-        }
-        if (validatableInput.minLength &&
-            typeof validatableInput.property === "string") {
-            isValid =
-                isValid &&
-                    validatableInput.property.trim().length >= validatableInput.minLength;
-        }
-        if (validatableInput.maxLength &&
-            typeof validatableInput.property === "string") {
-            isValid =
-                isValid &&
-                    validatableInput.property.trim().length <= validatableInput.maxLength;
-        }
-        if (validatableInput.min && typeof validatableInput.property === "number") {
-            isValid = isValid && validatableInput.property >= validatableInput.min;
-        }
-        if (validatableInput.max && typeof validatableInput.property === "number") {
-            isValid = isValid && validatableInput.property <= validatableInput.max;
-        }
-        return isValid;
-    }
-    App.validate = validate;
-})(App || (App = {}));
-var App;
-(function (App) {
-    function autobind(_, _2, descriptor) {
-        const originalMethod = descriptor.value;
-        const modifiedDescriptor = {
-            configurable: true,
-            get() {
-                const boundFn = originalMethod.bind(this);
-                return boundFn;
-            },
-        };
-        return modifiedDescriptor;
-    }
-    App.autobind = autobind;
-})(App || (App = {}));
-var App;
-(function (App) {
-    class Component {
-        constructor(templateId, hostElementId, insertAtStart, newElementId) {
-            this.templateElement = document.getElementById(templateId);
-            this.hostElement = document.getElementById(hostElementId);
-            const importedNode = document.importNode(this.templateElement.content, true);
-            this.element = importedNode.firstElementChild;
-            if (newElementId) {
-                this.element.id = newElementId;
-            }
-            this.render(insertAtStart);
-        }
-        render(insertAtStart) {
-            this.hostElement.insertAdjacentElement(insertAtStart ? "afterbegin" : "beforeend", this.element);
-        }
-    }
-    App.Component = Component;
 })(App || (App = {}));
 var App;
 (function (App) {
@@ -194,6 +176,24 @@ var App;
 })(App || (App = {}));
 var App;
 (function (App) {
+    let ProjectStatus;
+    (function (ProjectStatus) {
+        ProjectStatus[ProjectStatus["Active"] = 0] = "Active";
+        ProjectStatus[ProjectStatus["Finished"] = 1] = "Finished";
+    })(ProjectStatus = App.ProjectStatus || (App.ProjectStatus = {}));
+    class Project {
+        constructor(id, title, description, people, projectStatus) {
+            this.id = id;
+            this.title = title;
+            this.description = description;
+            this.people = people;
+            this.projectStatus = projectStatus;
+        }
+    }
+    App.Project = Project;
+})(App || (App = {}));
+var App;
+(function (App) {
     class ProjectList extends App.Component {
         constructor(type) {
             super("project-list", "app", false, `${type}-projects`);
@@ -256,6 +256,12 @@ var App;
 })(App || (App = {}));
 var App;
 (function (App) {
+    new App.ProjectInput();
+    new App.ProjectList("active");
+    new App.ProjectList("finished");
+})(App || (App = {}));
+var App;
+(function (App) {
     class ProjectItem extends App.Component {
         get persons() {
             if (this.project.people === 1) {
@@ -295,11 +301,5 @@ var App;
         App.autobind
     ], ProjectItem.prototype, "dragEndHandler", null);
     App.ProjectItem = ProjectItem;
-})(App || (App = {}));
-var App;
-(function (App) {
-    new App.ProjectInput();
-    new App.ProjectList("active");
-    new App.ProjectList("finished");
 })(App || (App = {}));
 //# sourceMappingURL=bundle.js.map
