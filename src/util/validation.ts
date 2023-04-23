@@ -1,5 +1,3 @@
-namespace App {
-    //validation
   export interface validationObject {
     property: string | number;
     required?: boolean;
@@ -39,5 +37,3 @@ namespace App {
     }
     return isValid;
   }
-
-}
